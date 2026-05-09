@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>儿童积分系统-家长儿童双端版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Noto Sans SC',sans-serif;min-height:100vh;}
+        .gradient-bg{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);}
+        .card{background:#fff;border-radius:20px;padding:24px;margin-bottom:16px;box-shadow:0 4px 20px rgba(0,0,0,0.08);transition:transform 0.3s;}
+        .card:hover{transform:translateY(-2px);}
+        .btn{padding:10px 18px;border-radius:12px;border:none;font-weight:600;cursor:pointer;transition:all 0.3s;}
+        .btn:hover{transform:scale(1.02);box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+        .btn-add{background:linear-gradient(135deg,#11998e,#38ef7d);color:white;}
+        .btn-sub{background:linear-gradient(135deg,#eb3349,#f45c43);color:white;}
+        .btn-primary{background:linear-gradient(135deg,#4facfe,#00f2fe);color:white;}
+        .btn-warning{background:linear-gradient(135deg,#fa709a,#fee140);color:#333;}
+        .btn-danger{background:linear-gradient(135deg,#ff416c,#ff4b2b);color:white;}
+        .btn-sm{padding:6px 12px;font-size:13px;border-radius:8px;}
+        input,select{width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:12px;margin:6px 0;font-size:15px;transition:border-color 0.3s;}
+        input:focus,select:focus{outline:none;border-color:#667eea;}
+        .tab{display:flex;gap:8px;margin-bottom:20px;overflow-x:auto;padding-bottom:8px;}
+        .tab::-webkit-scrollbar{height:4px;}
+        .tab::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px;}
+        .tab-item{flex-shrink:0;padding:12px 16px;background:#f1f5f9;border-radius:12px;text-align:center;cursor:pointer;font-weight:500;transition:all 0.3s;white-space:nowrap;}
+        .tab-item:hover{background:#e2e8f0;}
+        .tab-item.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;}
+        .hide{display:none !important;}
+        .grid-btn{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0;}
+        .tag{display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;padding:6px 12px;border-radius:20px;font-size:13px;margin:3px;}
+        .tag-remove{background:#fee;cursor:pointer;color:#ef4444;font-weight:bold;}
+        .calendar-table{width:100%;border-collapse:collapse;margin-top:15px;}
+        .calendar-table th,.calendar-table td{border:1px solid #e2e8f0;padding:8px;text-align:center;font-size:13px;}
+        .calendar-table th{background:#f8fafc;font-weight:600;color:#64748b;}
+        .calendar-table td{background:#fff;transition:background 0.2s;}
+        .calendar-table td:hover{background:#f0f9ff;}
+        .add-text{color:#22c55e;font-weight:600;}
+        .sub-text{color:#ef4444;font-weight:600;}
+        .net-text{color:#3b82f6;font-weight:700;}
+        .item-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid #f1f5f9;}
+        .item-row:last-child{border-bottom:none;}
+        .log-box{min-height:100px;border:2px solid #e2e8f0;border-radius:12px;padding:12px;margin-top:12px;max-height:300px;overflow-y:auto;}
+        .log-box::-webkit-scrollbar{width:6px;}
+        .log-box::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
+        .wheel-box{position:relative;width:320px;height:320px;margin:20px auto;}
+        #wheelCanvas{width:100%;height:100%;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.1));}
+        .pointer{position:absolute;top:-15px;left:50%;transform:translateX(-50%);width:40px;height:60px;background:linear-gradient(180deg,#ffd700,#ff8c00);clip-path:polygon(50% 0%,0% 100%,100% 100%);z-index:2;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+        .spin-btn{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#ff416c,#ff4b2b);color:white;font-size:18px;font-weight:bold;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:none;z-index:3;cursor:pointer;box-shadow:0 4px 20px rgba(255,65,108,0.4);transition:all 0.3s;}
+        .spin-btn:hover{transform:translate(-50%,-50%) scale(1.05);}
+        .spin-btn:disabled{background:#ccc;cursor:not-allowed;}
+        .pwd-mask{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
+        .pwd-box{background:#fff;padding:40px;border-radius:24px;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+        .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9998;}
+        .modal-content{background:#fff;padding:24px;border-radius:20px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;}
+        .score-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#fef3c7,#fde68a);padding:8px 20px;border-radius:30px;font-weight:700;color:#92400e;font-size:18px;}
+        .child-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-size:20px;font-weight:bold;}
+        .rule-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#f8fafc;border-radius:12px;margin-bottom:8px;}
+        .rule-item .rule-name{font-weight:600;color:#334155;}
+        .rule-item .rule-value{color:#667eea;font-weight:700;}
+        .rule-item .rule-actions{display:flex;gap:8px;}
+        .stat-card{background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:20px;border-radius:16px;text-align:center;}
+        .stat-card.green{background:linear-gradient(135deg,#11998e,#38ef7d);}
+        .stat-card.red{background:linear-gradient(135deg,#eb3349,#f45c43);}
+        .stat-card .stat-num{font-size:32px;font-weight:700;}
+        .stat-card .stat-label{font-size:14px;opacity:0.9;}
+        .login-tabs{display:flex;gap:8px;margin-bottom:20px;}
+        .login-tab{flex:1;padding:12px;text-align:center;border-radius:12px;background:#f1f5f9;cursor:pointer;font-weight:600;transition:all 0.3s;}
+        .login-tab.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;}
+        .detail-item{display:flex;align-items:center;gap:12px;padding:14px;border-bottom:1px solid #f1f5f9;}
+        .detail-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+        .detail-icon.add{background:#dcfce7;color:#22c55e;}
+        .detail-icon.sub{background:#fee2e2;color:#ef4444;}
+        .detail-content{flex:1;}
+        .detail-title{font-weight:600;color:#334155;}
+        .detail-time{font-size:12px;color:#94a3b8;}
+        .detail-score{font-weight:700;font-size:18px;}
+        .detail-score.add{color:#22c55e;}
+        .detail-score.sub{color:#ef4444;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .fade-in{animation:fadeIn 0.3s ease-out;}
+        @keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.05);}}
+        .pulse{animation:pulse 1s infinite;}
+    </style>
+</head>
+<body>
+
+<!-- 登录界面 -->
+<div id="loginMask" class="pwd-mask">
+    <div class="pwd-box">
+        <h2 class="text-center text-2xl font-bold mb-2">🏆 儿童积分管理系统</h2>
+        <p class="text-center text-gray-500 mb-6">☁️ 云端同步 · 多端互通</p>
+        
+        <div class="login-tabs">
+            <div class="login-tab active" onclick="switchLoginTab('parent')">👨‍👩‍👧 家长</div>
+            <div class="login-tab" onclick="switchLoginTab('child')">👶 儿童</div>
+        </div>
+        
+        <div id="parentLogin">
+            <input type="password" id="sysPwd" placeholder="请输入家长密码">
+            <button class="btn btn-primary w-full mt-2" onclick="checkParentPwd()">进入家长端</button>
+            <p class="text-gray-400 text-sm mt-4 text-center">默认密码：123456</p>
+        </div>
+        
+        <div id="childLogin" class="hide">
+            <select id="childSelect"></select>
+            <input type="password" id="childPwd" placeholder="请输入专属密码">
+            <button class="btn btn-primary w-full mt-2" onclick="checkChildPwd()">进入儿童端</button>
+            <p class="text-gray-400 text-sm mt-4 text-center">请使用家长端创建专属密码</p>
+        </div>
+    </div>
+</div>
+
+<!-- 家长端主界面 -->
+<div id="parentSys" class="max-w-2xl mx-auto p-4 hide">
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-bold text-gray-800">👨‍👩‍👧 家长管理端</h1>
+        <button class="btn btn-sm btn-warning" onclick="logout('parent')">退出</button>
+    </div>
+    
+    <div class="flex gap-3 mb-4">
+        <div class="flex-1 text-center py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-400 text-white font-bold shadow-lg">
+            ☁️ 云端已同步
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="forceSyncToCloud()">🔄 手动同步</button>
+    </div>
+
+    <!-- 功能标签页 -->
+    <div class="tab" id="parentTabs">
+        <div class="tab-item active" data-tab="0">📝 积分操作</div>
+        <div class="tab-item" data-tab="1">🎁 积分兑换</div>
+        <div class="tab-item" data-tab="2">🎡 大转盘</div>
+        <div class="tab-item" data-tab="3">📅 日历</div>
+        <div class="tab-item" data-tab="4">⚙️ 规则设置</div>
+        <div class="tab-item" data-tab="5">👶 账号管理</div>
+    </div>
+
+    <!-- 积分操作 -->
+    <div id="tab0" class="card">
+        <h3 class="font-bold mb-3 flex items-center gap-2">
+            积分操作
+        </h3>
+        <div class="mb-4">
+            <label class="text-sm text-gray-600">选择儿童：</label>
+            <select id="parentChildSelect" onchange="parentSelectChild(this.value)" class="bg-white">
+                <option value="">请选择儿童</option>
+            </select>
+        </div>
+        <div class="mb-4 flex gap-4 items-center">
+            <div>
+                <span class="text-gray-600">当前积分：</span>
+                <span id="totalScore" class="score-badge">0</span>
+            </div>
+            <div>
+                <span class="text-gray-600">今日得分：</span>
+                <span id="todayScore" class="text-lg font-bold text-green-600">0</span>
+            </div>
+        </div>
+        <div id="todayTags" class="mb-3"></div>
+        
+        <h4 class="text-green-600 font-bold mb-2 flex items-center gap-2">
+            ✨ 加分项 <button class="btn btn-sm btn-add ml-2" onclick="openRuleModal('add')">+ 添加</button>
+        </h4>
+        <div id="addBtnBox" class="grid-btn"></div>
+        
+        <h4 class="text-red-600 font-bold mt-4 mb-2 flex items-center gap-2">
+            ⚡ 扣分项 <button class="btn btn-sm btn-sub ml-2" onclick="openRuleModal('sub')">+ 添加</button>
+        </h4>
+        <div id="subBtnBox" class="grid-btn"></div>
+        
+        <div class="mt-5 pt-4 border-t">
+            <h4 class="font-bold mb-2">📝 自定义操作</h4>
+            <div class="grid grid-cols-2 gap-3">
+                <input type="number" id="customScore" placeholder="分值">
+                <input type="text" id="customRemark" placeholder="说明">
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-2">
+                <button class="btn btn-add" onclick="customDoScore(true)">加分</button>
+                <button class="btn btn-sub" onclick="customDoScore(false)">扣分</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 积分兑换 -->
+    <div id="tab1" class="card hide">
+        <h3 class="font-bold mb-3">积分兑换</h3>
+        <div class="mb-4">
+            <label class="text-sm text-gray-600">选择儿童：</label>
+            <select id="parentChildSelect1" onchange="parentSelectChild(this.value)" class="bg-white">
+                <option value="">请选择儿童</option>
+            </select>
+        </div>
+        <select id="exchangeSel" onchange="fillExchange()"></select>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+            <input type="number" id="exScore" placeholder="所需积分">
+            <input type="text" id="exName" placeholder="兑换说明">
+        </div>
+        <button class="btn btn-warning w-full mt-3" onclick="doExchange()">确认兑换</button>
+        <div class="mt-4">
+            <b class="text-gray-700">兑换记录</b>
+            <div id="exchangeList" class="log-box"></div>
+        </div>
+    </div>
+
+    <!-- 大转盘 -->
+    <div id="tab2" class="card hide">
+        <h3 class="font-bold mb-3 text-center">大转盘</h3>
+        <div class="mb-4">
+            <label class="text-sm text-gray-600">选择儿童：</label>
+            <select id="parentChildSelect2" onchange="parentSelectChild(this.value)" class="bg-white">
+                <option value="">请选择儿童</option>
+            </select>
+        </div>
+        <div class="text-center mb-2">
+            当前积分：<span id="wheelCurScore" class="text-red-500 font-bold text-xl">0</span>
+        </div>
+        <p class="text-center text-gray-500 text-sm">每次消耗：<span id="costOnce">5</span> 积分</p>
+        <div class="wheel-box">
+            <div class="pointer"></div>
+            <canvas id="wheelCanvas"></canvas>
+            <button class="spin-btn" id="spinBtn" onclick="startSpin()">抽奖</button>
+        </div>
+        <div class="text-center mt-3">
+            <button class="btn btn-sm btn-warning" onclick="openWheelSet()">设置消耗积分</button>
+        </div>
+        <div class="mt-4">
+            <b class="text-gray-700">中奖记录</b>
+            <div id="wheelLog" class="log-box"></div>
+        </div>
+    </div>
+
+    <!-- 日历 -->
+    <div id="tab3" class="card hide">
+        <h3 class="font-bold mb-3">当月日历</h3>
+        <div class="mb-4">
+            <label class="text-sm text-gray-600">选择儿童：</label>
+            <select id="parentChildSelect3" onchange="parentSelectChild(this.value)" class="bg-white">
+                <option value="">请选择儿童</option>
+            </select>
+        </div>
+        <div id="monthInfo" class="text-center font-bold text-lg text-purple-600 mb-3"></div>
+        <div id="calendarBox"></div>
+    </div>
+
+    <!-- 规则设置 -->
+    <div id="tab4" class="card hide">
+        <h3 class="font-bold text-xl mb-4">⚙️ 规则设置</h3>
+        
+        <div class="mb-6">
+            <h4 class="text-yellow-600 font-bold mb-3 flex items-center gap-2">
+                🎁 大转盘奖品
+            </h4>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+                <input type="text" id="prizeName" placeholder="奖品名称">
+                <input type="number" id="prizeRate" placeholder="概率 %">
+            </div>
+            <button class="btn btn-warning w-full" onclick="addPrize()">添加奖品</button>
+            <div id="prizeList" class="mt-3 space-y-2"></div>
+        </div>
+
+        <div class="mb-6">
+            <h4 class="text-green-600 font-bold mb-3">✨ 加分规则</h4>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="addName" placeholder="名称">
+                <input type="number" id="addVal" placeholder="分值">
+            </div>
+            <button class="btn btn-add w-full mt-2" onclick="addAddRule()">添加加分规则</button>
+            <div id="addList" class="mt-3 space-y-2"></div>
+        </div>
+
+        <div class="mb-6">
+            <h4 class="text-red-600 font-bold mb-3">⚡ 扣分规则</h4>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="subName" placeholder="名称">
+                <input type="number" id="subVal" placeholder="分值">
+            </div>
+            <button class="btn btn-sub w-full mt-2" onclick="addSubRule()">添加扣分规则</button>
+            <div id="subList" class="mt-3 space-y-2"></div>
+        </div>
+
+        <div>
+            <h4 class="text-blue-600 font-bold mb-3">🎁 兑换项目</h4>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="newExName" placeholder="名称">
+                <input type="number" id="newExScore" placeholder="所需积分">
+            </div>
+            <button class="btn btn-primary w-full mt-2" onclick="addExchangeRule()">添加兑换项目</button>
+            <div id="exRuleList" class="mt-3 space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- 账号管理 -->
+    <div id="tab5" class="card hide">
+        <h3 class="font-bold text-lg flex items-center gap-2 mb-4">👶 儿童账号管理</h3>
+        <div class="mb-4">
+            <button class="btn btn-sm btn-add w-full" onclick="openAddChildModal()">+ 添加新儿童</button>
+        </div>
+        <div id="childList" class="space-y-2"></div>
+        <div class="mt-6 pt-4 border-t">
+            <h4 class="font-bold mb-3">🔐 修改家长密码</h4>
+            <input type="password" id="newPwd" placeholder="设置新家长密码">
+            <button class="btn btn-sm btn-warning w-full mt-2" onclick="setNewPwd()">确认修改</button>
+        </div>
+    </div>
+</div>
+
+<!-- 儿童端主界面 -->
+<div id="childSys" class="max-w-2xl mx-auto p-4 hide">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+            <div class="child-avatar" id="childAvatar">👶</div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-800" id="childName">小朋友</h1>
+                <p class="text-sm text-gray-500">儿童端</p>
+            </div>
+        </div>
+        <button class="btn btn-sm btn-warning" onclick="logout('child')">退出</button>
+    </div>
+
+    <!-- 积分展示 -->
+    <div class="card bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+        <p class="text-center opacity-90 mb-2">我的积分</p>
+        <p class="text-center text-5xl font-bold" id="childScore">0</p>
+        <div class="flex justify-center gap-6 mt-4 text-sm">
+            <div>今日：<span id="childTodayScore" class="font-bold">0</span></div>
+            <div>本周：<span id="childWeekScore" class="font-bold">0</span></div>
+        </div>
+    </div>
+
+    <!-- 功能标签 -->
+    <div class="tab" id="childTabs">
+        <div class="tab-item active" data-tab="0">📋 积分明细</div>
+        <div class="tab-item" data-tab="1">🎁 兑换</div>
+        <div class="tab-item" data-tab="2">🎡 转盘</div>
+        <div class="tab-item" data-tab="3">📅 日历</div>
+    </div>
+
+    <!-- 积分明细 -->
+    <div id="childTab0" class="card">
+        <h3 class="font-bold mb-4">📋 积分明细</h3>
+        <div class="mb-4">
+            <select id="monthFilter" onchange="renderChildDetail()" class="bg-white">
+                <option value="">全部时间</option>
+            </select>
+        </div>
+        <div id="childDetailList" class="space-y-2"></div>
+    </div>
+
+    <!-- 兑换 -->
+    <div id="childTab1" class="card hide">
+        <h3 class="font-bold mb-4">🎁 积分兑换</h3>
+        <div id="childExchangeList" class="space-y-3 mb-4"></div>
+        <div class="mt-4">
+            <b class="text-gray-700">📜 兑换记录</b>
+            <div id="childExchangeLog" class="log-box"></div>
+        </div>
+    </div>
+
+    <!-- 转盘 -->
+    <div id="childTab2" class="card hide">
+        <h3 class="font-bold mb-3 text-center">🎡 幸运大转盘</h3>
+        <div class="text-center mb-2">
+            我的积分：<span id="childWheelScore" class="text-red-500 font-bold text-xl">0</span>
+        </div>
+        <p class="text-center text-gray-500 text-sm">每次消耗：<span id="childCostOnce">5</span> 积分</p>
+        <div class="wheel-box">
+            <div class="pointer"></div>
+            <canvas id="childWheelCanvas"></canvas>
+            <button class="spin-btn" id="childSpinBtn" onclick="startChildSpin()">抽奖</button>
+        </div>
+        <div class="mt-4">
+            <b class="text-gray-700">我的中奖记录</b>
+            <div id="childWheelLog" class="log-box"></div>
+        </div>
+    </div>
+
+    <!-- 儿童端日历 -->
+    <div id="childTab3" class="card hide">
+        <h3 class="font-bold mb-3">📅 我的日历</h3>
+        <div class="mb-4">
+            <select id="childCalendarMonth" onchange="renderChildCalendar()" class="bg-white">
+                <option value="">全部时间</option>
+            </select>
+        </div>
+        <div id="childMonthInfo" class="text-center font-bold text-lg text-purple-600 mb-3"></div>
+        <div id="childCalendarBox"></div>
+    </div>
+</div>
+
+<!-- 添加/编辑儿童弹窗 -->
+<div id="childModal" class="modal hide">
+    <div class="modal-content">
+        <h3 class="font-bold text-xl mb-4" id="childModalTitle">添加儿童</h3>
+        <input type="hidden" id="editChildId">
+        <input type="text" id="editChildName" placeholder="姓名">
+        <input type="password" id="editChildPwd" placeholder="设置专属密码（4位数字）">
+        <input type="number" id="editChildInitScore" placeholder="初始积分（可不填）" value="0">
+        <div class="flex gap-3 mt-4">
+            <button class="btn btn-primary flex-1" onclick="saveChild()">保存</button>
+            <button class="btn btn-sm bg-gray-200 flex-1" onclick="closeChildModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 添加/编辑规则弹窗 -->
+<div id="ruleModal" class="modal hide">
+    <div class="modal-content">
+        <h3 class="font-bold text-xl mb-4" id="ruleModalTitle">添加规则</h3>
+        <input type="hidden" id="editRuleType">
+        <input type="hidden" id="editRuleIndex">
+        <input type="text" id="editRuleName" placeholder="名称">
+        <input type="number" id="editRuleVal" placeholder="分值">
+        <div class="flex gap-3 mt-4">
+            <button class="btn btn-primary flex-1" onclick="saveRule()">保存</button>
+            <button class="btn btn-sm bg-gray-200 flex-1" onclick="closeRuleModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ================== 云端核心配置 ==================
+const CLOUD_ID = "scoreApp_2025_v2";
+
+// ================== 云端读取/保存 ==================
+async function cloudGet() {
+  try {
+    let res = await fetch("https://api.yyunlove.com/api/get/"+CLOUD_ID);
+    let data = await res.json();
+    return data.data ? JSON.parse(data.data) : null;
+  } catch(e){ return null }
+}
+async function cloudSet(d) {
+  try {
+    await fetch("https://api.yyunlove.com/api/set/"+CLOUD_ID, {
+      method:"POST", body:JSON.stringify(d)
+    });
+  }catch(e){}
+}
+
+// ================== 数据初始化 ==================
+let parentPwd = "123456";
+let app = {
+  children:[],
+  records:[],
+  exchangeLog:[],
+  wheelLog:[],
+  daily:{},
+  add:[
+    {name:'按时起床',val:2},
+    {name:'按时睡觉',val:2},
+    {name:'主动写作业',val:3},
+    {name:'收拾玩具',val:1},
+    {name:'帮助家务',val:2}
+  ],
+  sub:[
+    {name:'玩手机超时',val:5},
+    {name:'作业拖延',val:3},
+    {name:'挑食',val:2}
+  ],
+  exchange:[
+    {name:'自选零食',score:10},
+    {name:'免一次家务',score:15},
+    {name:'看动画片30分钟',score:20},
+    {name:'课外书',score:30},
+    {name:'玩具',score:50}
+  ],
+  wheelCost:5,
+  prize:[
+    {name:"谢谢参与",rate:40},
+    {name:"加2积分",rate:25},
+    {name:"加5积分",rate:15},
+    {name:"加10积分",rate:10},
+    {name:"小零食",rate:7},
+    {name:"心愿大奖",rate:3}
+  ]
+};
+
+// ================== 自动保存（本地+云端，失败不影响本地） ==================
+function autoSave() {
+  // 先保存本地
+  localStorage.setItem('localParentPwd', parentPwd);
+  localStorage.setItem('localApp', JSON.stringify(app));
+  // 再尝试云端保存（异步，不阻塞）
+  cloudSet({parentPwd, app});
+}
+
+// ================== 手动同步到云端 ==================
+async function forceSyncToCloud() {
+  try {
+    await cloudSet({parentPwd, app});
+    alert('☁️ 数据已同步到云端！');
+  } catch(e) {
+    alert('❌ 同步失败，请检查网络');
+  }
+}
+
+// ================== 加载数据（优先本地，后云端） ==================
+async function loadCloud() {
+  // 先尝试加载本地数据
+  let localApp = localStorage.getItem('localApp');
+  let localPwd = localStorage.getItem('localParentPwd');
+  if (localApp) {
+    try {
+      app = JSON.parse(localApp);
+      parentPwd = localPwd || "123456";
+    } catch(e) {}
+  }
+  // 再尝试获取云端数据（如果云端有新数据则更新）
+  try {
+    let data = await cloudGet();
+    if(data && data.app){
+      parentPwd = data.parentPwd || "123456";
+      app = data.app;
+      // 同步到本地
+      localStorage.setItem('localParentPwd', parentPwd);
+      localStorage.setItem('localApp', JSON.stringify(app));
+    }
+  } catch(e) {}
+  initSystem();
+}
+
+// ================== 登录相关 ==================
+let currentLoginType = 'parent';
+let currentChildId = null;
+
+function switchLoginTab(type) {
+  currentLoginType = type;
+  document.querySelectorAll('.login-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.textContent.includes(type === 'parent' ? '家长' : '儿童'));
+  });
+  document.getElementById('parentLogin').classList.toggle('hide', type !== 'parent');
+  document.getElementById('childLogin').classList.toggle('hide', type !== 'child');
+  if (type === 'child') {
+    renderChildSelect();
+  }
+}
+
+function renderChildSelect() {
+  let sel = document.getElementById('childSelect');
+  let h = '<option value="">选择小朋友</option>';
+  app.children.forEach(c => h += `<option value="${c.id}">${c.name}</option>`);
+  sel.innerHTML = h;
+}
+
+function checkParentPwd() {
+  if (document.getElementById('sysPwd').value === parentPwd) {
+    document.getElementById('loginMask').classList.add('hide');
+    document.getElementById('parentSys').classList.remove('hide');
+    renderAll();
+  } else {
+    alert('密码错误');
+  }
+}
+
+function checkChildPwd() {
+  let childId = document.getElementById('childSelect').value;
+  let pwd = document.getElementById('childPwd').value;
+  if (!childId) return alert('请选择小朋友');
+  let child = app.children.find(c => c.id == childId);
+  if (!child) return alert('小朋友不存在');
+  if (child.pwd !== pwd) return alert('密码错误');
+  currentChildId = childId;
+  document.getElementById('loginMask').classList.add('hide');
+  document.getElementById('childSys').classList.remove('hide');
+  initChildSys();
+}
+
+function logout(type) {
+  if (type === 'parent') {
+    document.getElementById('parentSys').classList.add('hide');
+  } else {
+    document.getElementById('childSys').classList.add('hide');
+    currentChildId = null;
+  }
+  document.getElementById('loginMask').classList.remove('hide');
+}
+
+function setNewPwd() {
+  let p = document.getElementById('newPwd').value.trim();
+  if (!p) return;
+  parentPwd = p;
+  autoSave();
+  alert('密码修改成功');
+  document.getElementById('newPwd').value = '';
+}
+
+// ================== 儿童管理 ==================
+function openAddChildModal(id = null) {
+  document.getElementById('childModal').classList.remove('hide');
+  document.getElementById('editChildId').value = id || '';
+  if (id) {
+    let child = app.children.find(c => c.id == id);
+    document.getElementById('childModalTitle').textContent = '编辑儿童';
+    document.getElementById('editChildName').value = child.name;
+    document.getElementById('editChildPwd').value = child.pwd || '';
+    document.getElementById('editChildInitScore').value = child.total;
+  } else {
+    document.getElementById('childModalTitle').textContent = '添加儿童';
+    document.getElementById('editChildName').value = '';
+    document.getElementById('editChildPwd').value = '';
+    document.getElementById('editChildInitScore').value = '0';
+  }
+}
+
+function closeChildModal() {
+  document.getElementById('childModal').classList.add('hide');
+}
+
+function saveChild() {
+  let id = document.getElementById('editChildId').value;
+  let name = document.getElementById('editChildName').value.trim();
+  let pwd = document.getElementById('editChildPwd').value.trim();
+  let initScore = parseInt(document.getElementById('editChildInitScore').value) || 0;
+  
+  if (!name) return alert('请输入姓名');
+  if (!pwd) return alert('请设置密码');
+  if (pwd.length < 4) return alert('密码至少4位');
+  
+  if (id) {
+    let child = app.children.find(c => c.id == id);
+    child.name = name;
+    child.pwd = pwd;
+    child.total = initScore;
+  } else {
+    app.children.push({id: Date.now(), name, pwd, total: initScore});
+  }
+  
+  autoSave();
+  renderChildren();
+  closeChildModal();
+}
+
+function delChild(idx) {
+  let childName = app.children[idx] ? app.children[idx].name : '';
+  if (!confirm('确定删除【' + childName + '】？数据将无法恢复！')) return;
+  app.children.splice(idx, 1);
+  autoSave();
+  renderChildren();
+}
+
+function renderChildren() {
+  let box = document.getElementById('childList');
+  if (!box) return;
+  if (app.children.length === 0) {
+    box.innerHTML = '<p class="text-gray-400 text-center py-4">暂无小朋友，请添加</p>';
+    return;
+  }
+  let h = '';
+  for (let i = 0; i < app.children.length; i++) {
+    let c = app.children[i];
+    h += '<div class="flex items-center justify-between p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">';
+    h += '<div class="flex items-center gap-3">';
+    h += '<div class="child-avatar" style="width:40px;height:40px;font-size:16px;">' + c.name[0] + '</div>';
+    h += '<div><div class="font-bold">' + c.name + '</div>';
+    h += '<div class="text-sm text-gray-500">积分：' + c.total + '</div></div>';
+    h += '</div>';
+    h += '<div class="flex gap-2">';
+    h += '<button class="btn btn-sm btn-danger" onclick="delChild(' + i + ')">删除</button>';
+    h += '</div></div>';
+  }
+  box.innerHTML = h;
+}
+
+// ================== 今日已选 ==================
+function today() { return new Date().toISOString().slice(0,10); }
+
+function dailyKey(childId) { return childId + "-" + today(); }
+
+function refreshTags() {
+  let box = document.getElementById('todayTags');
+  if (!app.cur) { box.innerHTML = ''; return; }
+  let key = dailyKey(app.cur);
+  let t = app.daily[key] || {};
+  let items = Object.keys(t);
+  if (items.length === 0) {
+    box.innerHTML = '<p class="text-gray-400">今日已选：无</p>';
+    return;
+  }
+  let html = '<p class="text-gray-600 mb-2">今日已选：</p><div class="flex flex-wrap">';
+  items.forEach(x => {
+    html += `<span class="tag">${x} <button onclick="delToday('${x}')" class="tag-remove">✕</button></span>`;
+  });
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+function delToday(remark) {
+  let key = dailyKey(app.cur);
+  if (!app.daily[key]) return;
+  delete app.daily[key][remark];
+  autoSave();
+  renderAll();
+}
+
+// ================== 大转盘 ==================
+let canvas, ctx, isSpinning = false;
+const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dda0dd', '#98d8c8', '#f7dc6f'];
+
+function initWheel() {
+  canvas = document.getElementById('wheelCanvas');
+  ctx = canvas.getContext('2d');
+  canvas.width = 320;
+  canvas.height = 320;
+  drawWheel();
+}
+
+function drawWheel() {
+  let list = app.prize;
+  let len = list.length;
+  let arc = Math.PI * 2 / len;
+  ctx.clearRect(0, 0, 320, 320);
+  
+  // 绘制外圈
+  for (let i = 0; i < len; i++) {
+    ctx.beginPath();
+    ctx.moveTo(160, 160);
+    ctx.arc(160, 160, 155, i * arc, (i + 1) * arc);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    ctx.save();
+    ctx.translate(160, 160);
+    ctx.rotate(i * arc + arc / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = "bold 13px 'Noto Sans SC', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(list[i].name, 95, 5);
+    ctx.restore();
+  }
+  
+  // 中心圆
+  ctx.beginPath();
+  ctx.arc(160, 160, 30, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.strokeStyle = '#ddd';
+  ctx.stroke();
+}
+
+function startSpin() {
+  if (isSpinning || !app.cur) return alert('请先选择小朋友');
+  let c = app.children.find(x => x.id === app.cur);
+  if (c.total < app.wheelCost) return alert('积分不足');
+  isSpinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  c.total -= app.wheelCost;
+  autoSave();
+  refreshWheelScore();
+  
+  let r = Math.random() * 100, sum = 0, idx = 0;
+  for (let i = 0; i < app.prize.length; i++) {
+    sum += app.prize[i].rate;
+    if (r <= sum) { idx = i; break; }
+  }
+  
+  let target = 360 * 5 + (360 - (360 / app.prize.length) * idx - (360 / app.prize.length / 2));
+  let angle = 0;
+  let timer = setInterval(() => {
+    angle += 6;
+    if (angle >= target) {
+      clearInterval(timer);
+      angle = target;
+      isSpinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      
+      let p = app.prize[idx];
+      alert(`🎉 抽中：${p.name}`);
+      
+      // 处理积分奖励
+      if (p.name.includes('加')) {
+        let bonus = parseInt(p.name.replace(/[^0-9]/g, '')) || 0;
+        if (bonus > 0) {
+          c.total += bonus;
+          app.records.push({time: new Date().toLocaleString(), date: today(), child: app.cur, score: bonus, remark: `转盘中奖：${p.name}`});
+        }
+      }
+      
+      app.wheelLog.unshift({time: new Date().toLocaleString(), childId: app.cur, prize: p.name});
+      autoSave();
+      renderWheelLog();
+      renderAll();
+    }
+    ctx.save();
+    ctx.translate(160, 160);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.translate(-160, -160);
+    drawWheel();
+    ctx.restore();
+  }, 20);
+}
+
+function refreshWheelScore() {
+  if (!app.cur) {
+    document.getElementById('wheelCurScore').innerText = 0;
+    return;
+  }
+  let c = app.children.find(x => x.id === app.cur);
+  document.getElementById('wheelCurScore').innerText = c.total;
+  document.getElementById('costOnce').innerText = app.wheelCost;
+}
+
+function renderWheelLog() {
+  let box = document.getElementById('wheelLog');
+  if (!app.cur) { box.innerText = '请选择小朋友'; return; }
+  let list = app.wheelLog.filter(x => x.childId === app.cur);
+  if (list.length === 0) { box.innerHTML = '<p class="text-gray-400">暂无记录</p>'; return; }
+  let html = '';
+  list.forEach(x => html += `<div class="border-b py-2">${x.time} → ${x.prize}</div>`);
+  box.innerHTML = html;
+}
+
+function openWheelSet() {
+  let n = parseInt(prompt('抽奖消耗积分', app.wheelCost));
+  if (n > 0) { app.wheelCost = n; autoSave(); refreshWheelScore(); }
+}
+
+// ================== 奖品规则 ==================
+function addPrize() {
+  let n = document.getElementById('prizeName').value.trim();
+  let r = parseInt(document.getElementById('prizeRate').value);
+  if (!n || isNaN(r)) return alert('填写完整');
+  app.prize.push({name: n, rate: r});
+  autoSave();
+  renderRules();
+  initWheel();
+  document.getElementById('prizeName').value = '';
+  document.getElementById('prizeRate').value = '';
+}
+
+function delPrize(i) {
+  if (app.prize.length <= 2) return alert('至少保留2个');
+  app.prize.splice(i, 1);
+  autoSave();
+  renderRules();
+  initWheel();
+}
+
+function renderPrizeList() {
+  let box = document.getElementById('prizeList');
+  let h = '';
+  app.prize.forEach((p, i) => {
+    h += `
+    <div class="rule-item">
+      <div>
+        <span class="rule-name">${p.name}</span>
+        <span class="rule-value ml-2">${p.rate}%</span>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="delPrize(${i})">删除</button>
+    </div>`;
+  });
+  box.innerHTML = h;
+}
+
+// ================== 加分/扣分规则 ==================
+function openRuleModal(type, index = null) {
+  document.getElementById('ruleModal').classList.remove('hide');
+  document.getElementById('editRuleType').value = type;
+  document.getElementById('editRuleIndex').value = index;
+  
+  if (index !== null) {
+    let rules = type === 'add' ? app.add : app.sub;
+    let rule = rules[index];
+    document.getElementById('ruleModalTitle').textContent = `编辑${type === 'add' ? '加分' : '扣分'}规则`;
+    document.getElementById('editRuleName').value = rule.name;
+    document.getElementById('editRuleVal').value = rule.val;
+  } else {
+    document.getElementById('ruleModalTitle').textContent = `添加${type === 'add' ? '加分' : '扣分'}规则`;
+    document.getElementById('editRuleName').value = '';
+    document.getElementById('editRuleVal').value = '';
+  }
+}
+
+function closeRuleModal() {
+  document.getElementById('ruleModal').classList.add('hide');
+}
+
+function saveRule() {
+  let type = document.getElementById('editRuleType').value;
+  let index = document.getElementById('editRuleIndex').value;
+  let name = document.getElementById('editRuleName').value.trim();
+  let val = parseInt(document.getElementById('editRuleVal').value);
+  
+  if (!name || !val) return alert('填写完整');
+  
+  if (type === 'add') {
+    if (index !== '') {
+      app.add[index].name = name;
+      app.add[index].val = val;
+    } else {
+      app.add.push({name, val});
+    }
+  } else {
+    if (index !== '') {
+      app.sub[index].name = name;
+      app.sub[index].val = val;
+    } else {
+      app.sub.push({name, val});
+    }
+  }
+  
+  autoSave();
+  renderAll();
+  closeRuleModal();
+}
+
+function addAddRule() {
+  let n = document.getElementById('addName').value.trim();
+  let v = parseInt(document.getElementById('addVal').value);
+  if (!n || !v) return;
+  app.add.push({name: n, val: v});
+  autoSave();
+  renderAll();
+  document.getElementById('addName').value = '';
+  document.getElementById('addVal').value = '';
+}
+
+function delAdd(i) {
+  app.add.splice(i, 1);
+  autoSave();
+  renderAll();
+}
+
+function addSubRule() {
+  let n = document.getElementById('subName').value.trim();
+  let v = parseInt(document.getElementById('subVal').value);
+  if (!n || !v) return;
+  app.sub.push({name: n, val: v});
+  autoSave();
+  renderAll();
+  document.getElementById('subName').value = '';
+  document.getElementById('subVal').value = '';
+}
+
+function delSub(i) {
+  app.sub.splice(i, 1);
+  autoSave();
+  renderAll();
+}
+
+function addExchangeRule() {
+  let n = document.getElementById('newExName').value.trim();
+  let s = parseInt(document.getElementById('newExScore').value);
+  if (!n || !s) return;
+  app.exchange.push({name: n, score: s});
+  autoSave();
+  renderAll();
+  document.getElementById('newExName').value = '';
+  document.getElementById('newExScore').value = '';
+}
+
+function delExchangeRule(i) {
+  app.exchange.splice(i, 1);
+  autoSave();
+  renderAll();
+}
+
+// ================== 选中儿童 ==================
+app.cur = null;
+
+function selectChild(id) {
+  app.cur = id;
+  autoSave();
+  renderAll();
+}
+
+// ================== 家长端儿童选择器 ==================
+function renderParentChildSelect() {
+  let selects = ['parentChildSelect', 'parentChildSelect1', 'parentChildSelect2', 'parentChildSelect3'];
+  selects.forEach(selId => {
+    let sel = document.getElementById(selId);
+    if (!sel) return;
+    let h = '<option value="">请选择儿童</option>';
+    app.children.forEach(c => {
+      let selected = app.cur == c.id ? 'selected' : '';
+      h += `<option value="${c.id}" ${selected}>${c.name} (${c.total}积分)</option>`;
+    });
+    sel.innerHTML = h;
+  });
+}
+
+function parentSelectChild(id) {
+  app.cur = id ? parseInt(id) : null;
+  autoSave();
+  renderAll();
+}
+
+// ================== 积分操作 ==================
+function quick(score, remark, btn) {
+  if (!app.cur) return alert('请先选择小朋友');
+  let key = dailyKey(app.cur);
+  if (!app.daily[key]) app.daily[key] = {};
+  if (app.daily[key][remark]) return alert('今日已选');
+  
+  let c = app.children.find(x => x.id === app.cur);
+  // 检查扣分后积分不能为负
+  if (score < 0 && c.total + score < 0) return alert('积分不足，无法扣这么多分');
+  
+  // 禁用按钮
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }
+  
+  c.total += score;
+  app.records.push({time: new Date().toLocaleString(), date: today(), child: app.cur, score, remark});
+  app.daily[key][remark] = true;
+  autoSave();
+  renderAll();
+}
+
+function customDoScore(isAdd) {
+  let s = Number(document.getElementById('customScore').value);
+  let r = document.getElementById('customRemark').value || '自定义';
+  if (!s) return alert('请输入分值');
+  quick(isAdd ? s : -s, r);
+  document.getElementById('customScore').value = '';
+  document.getElementById('customRemark').value = '';
+}
+
+// ================== 兑换 ==================
+function renderExchangeSel() {
+  let sel = document.getElementById('exchangeSel');
+  let h = '<option value="">选择兑换项目</option>';
+  app.exchange.forEach(r => h += `<option value="${r.score}" data-name="${r.name}">${r.name} - ${r.score}积分</option>`);
+  sel.innerHTML = h;
+}
+
+function fillExchange() {
+  let opt = document.getElementById('exchangeSel').selectedOptions[0];
+  document.getElementById('exScore').value = opt.value;
+  document.getElementById('exName').value = opt.dataset.name || '';
+}
+
+function doExchange() {
+  if (!app.cur) return alert('请选择小朋友');
+  let s = Number(document.getElementById('exScore').value);
+  let n = document.getElementById('exName').value.trim();
+  if (!s || !n) return alert('请填写完整');
+  
+  let c = app.children.find(x => x.id === app.cur);
+  if (c.total < s) return alert('积分不足');
+  
+  c.total -= s;
+  app.exchangeLog.unshift({time: new Date().toLocaleString(), date: today(), child: app.cur, name: n, score: s});
+  autoSave();
+  renderExchangeLog();
+  renderAll();
+  alert('兑换成功！');
+}
+
+function renderExchangeLog() {
+  let box = document.getElementById('exchangeList');
+  if (!app.cur) { box.innerHTML = '<p class="text-gray-400">请选择小朋友</p>'; return; }
+  let list = app.exchangeLog.filter(x => x.child === app.cur);
+  if (list.length === 0) { box.innerHTML = '<p class="text-gray-400">暂无记录</p>'; return; }
+  let html = '';
+  list.forEach(x => html += `<div class="border-b py-2">${x.time}<br>兑换：${x.name} -${x.score}积分</div>`);
+  box.innerHTML = html;
+}
+
+// ================== 日历 ==================
+function renderCalendar() {
+  if (!app.cur) return;
+  let now = new Date();
+  let y = now.getFullYear(), m = now.getMonth();
+  let first = new Date(y, m, 1).getDay();
+  let days = new Date(y, m + 1, 0).getDate();
+  let month = `${y}-${String(m + 1).padStart(2, '0')}`;
+  
+  let dayData = {};
+  for (let d = 1; d <= days; d++) dayData[d] = {add: 0, sub: 0, net: 0};
+  
+  let curRecords = app.records.filter(r => r.child === app.cur && r.date.startsWith(month));
+  curRecords.forEach(r => {
+    let d = parseInt(r.date.split('-')[2]);
+    if (r.score > 0) dayData[d].add += r.score;
+    if (r.score < 0) dayData[d].sub += Math.abs(r.score);
+  });
+  
+  for (let d = 1; d <= days; d++) dayData[d].net = dayData[d].add - dayData[d].sub;
+  
+  let total = Object.values(dayData).reduce((s, v) => s + v.net, 0);
+  document.getElementById('monthInfo').innerText = `${month} 当月净得分：${total}`;
+  
+  let week = ['日', '一', '二', '三', '四', '五', '六'];
+  let h = '<table class="calendar-table"><tr>';
+  week.forEach(w => h += `<th>${w}</th>`);
+  h += '</tr><tr>';
+  
+  for (let i = 0; i < first; i++) h += '<td></td>';
+  
+  for (let d = 1; d <= days; d++) {
+    let dd = dayData[d];
+    h += `<td>
+      <div class="font-bold">${d}日</div>
+      ${dd.add > 0 ? `<div class="add-text" style="font-size:11px">+${dd.add}</div>` : ''}
+      ${dd.sub > 0 ? `<div class="sub-text" style="font-size:11px">-${dd.sub}</div>` : ''}
+      <div class="net-text" style="font-size:12px">净:${dd.net}</div>
+    </td>`;
+    if ((first + d) % 7 === 0) h += '</tr><tr>';
+  }
+  h += '</tr></table>';
+  document.getElementById('calendarBox').innerHTML = h;
+}
+
+// ================== 全部渲染 ==================
+function renderRules() {
+  renderPrizeList();
+  
+  let h1 = '', h2 = '', h3 = '';
+  app.add.forEach((r, i) => {
+    h1 += `
+    <div class="rule-item">
+      <div>
+        <span class="rule-name">${r.name}</span>
+        <span class="rule-value ml-2">+${r.val}</span>
+      </div>
+      <div class="rule-actions">
+        <button class="btn btn-sm bg-blue-100 text-blue-600" onclick="openRuleModal('add',${i})">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="delAdd(${i})">删除</button>
+      </div>
+    </div>`;
+  });
+  
+  app.sub.forEach((r, i) => {
+    h2 += `
+    <div class="rule-item">
+      <div>
+        <span class="rule-name">${r.name}</span>
+        <span class="rule-value ml-2">-${r.val}</span>
+      </div>
+      <div class="rule-actions">
+        <button class="btn btn-sm bg-blue-100 text-blue-600" onclick="openRuleModal('sub',${i})">编辑</button>
+        <button class="btn btn-sm btn-danger" onclick="delSub(${i})">删除</button>
+      </div>
+    </div>`;
+  });
+  
+  app.exchange.forEach((r, i) => {
+    h3 += `
+    <div class="rule-item">
+      <div>
+        <span class="rule-name">${r.name}</span>
+        <span class="rule-value ml-2">${r.score}积分</span>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="delExchangeRule(${i})">删除</button>
+    </div>`;
+  });
+  
+  document.getElementById('addList').innerHTML = h1;
+  document.getElementById('subList').innerHTML = h2;
+  document.getElementById('exRuleList').innerHTML = h3;
+}
+
+function renderAll() {
+  renderChildren();
+  renderParentChildSelect();
+  let c = app.cur ? app.children.find(x => x.id === app.cur) : null;
+  
+  document.getElementById('totalScore').innerText = c ? c.total : 0;
+  
+  // 今日得分
+  let todayRecords = app.cur ? app.records.filter(r => r.child === app.cur && r.date === today()) : [];
+  let todayScore = todayRecords.reduce((s, r) => s + r.score, 0);
+  document.getElementById('todayScore').innerText = todayScore;
+  document.getElementById('todayScore').className = 'text-lg font-bold ' + (todayScore >= 0 ? 'text-green-600' : 'text-red-600');
+  
+  let h1 = '', h2 = '';
+  let key = app.cur ? dailyKey(app.cur) : null;
+  let t = key && app.daily[key] ? app.daily[key] : {};
+  app.add.forEach((r, i) => {
+    let remark = `${r.name}+${r.val}`;
+    let disabled = t[remark] ? 'disabled style="opacity:0.5;cursor:not-allowed"' : '';
+    h1 += `<button class="btn btn-add" onclick="quick(${r.val},'${remark}',this)" ${disabled}>${r.name}<br>+${r.val}</button>`;
+  });
+  app.sub.forEach((r, i) => {
+    let remark = `${r.name}-${r.val}`;
+    let disabled = t[remark] ? 'disabled style="opacity:0.5;cursor:not-allowed"' : '';
+    h2 += `<button class="btn btn-sub" onclick="quick(${-r.val},'${remark}',this)" ${disabled}>${r.name}<br>-${r.val}</button>`;
+  });
+  document.getElementById('addBtnBox').innerHTML = h1;
+  document.getElementById('subBtnBox').innerHTML = h2;
+  
+  refreshTags();
+  renderExchangeSel();
+  renderExchangeLog();
+  refreshWheelScore();
+  renderWheelLog();
+  renderRules();
+  renderCalendar();
+}
+
+// ================== 切换标签 ==================
+function switchTab(i) {
+  document.querySelectorAll('.tab-item').forEach((el, idx) => el.classList.toggle('active', idx === i));
+  document.getElementById('tab0').classList.toggle('hide', i !== 0);
+  document.getElementById('tab1').classList.toggle('hide', i !== 1);
+  document.getElementById('tab2').classList.toggle('hide', i !== 2);
+  document.getElementById('tab3').classList.toggle('hide', i !== 3);
+  document.getElementById('tab4').classList.toggle('hide', i !== 4);
+  document.getElementById('tab5').classList.toggle('hide', i !== 5);
+  if (i === 1) renderExchangeLog();
+  if (i === 3) renderCalendar();
+  if (i === 5) renderChildren();
+}
+
+// 页面加载后绑定事件
+document.addEventListener('DOMContentLoaded', function() {
+  // 家长端标签页事件委托
+  document.getElementById('parentTabs').addEventListener('click', function(e) {
+    let tabItem = e.target.closest('.tab-item');
+    if (tabItem) {
+      let tabIndex = parseInt(tabItem.dataset.tab);
+      switchTab(tabIndex);
+    }
+  });
+  
+  // 儿童端标签页事件委托
+  document.getElementById('childTabs').addEventListener('click', function(e) {
+    let tabItem = e.target.closest('.tab-item');
+    if (tabItem) {
+      let tabIndex = parseInt(tabItem.dataset.tab);
+      switchChildTab(tabIndex);
+    }
+  });
+});
+
+// ================== 儿童端功能 ==================
+function initChildSys() {
+  let child = app.children.find(c => c.id == currentChildId);
+  if (!child) return;
+  
+  document.getElementById('childAvatar').textContent = child.name[0];
+  document.getElementById('childName').textContent = child.name;
+  document.getElementById('childScore').textContent = child.total;
+  
+  initChildWheel();
+  renderChildDetail();
+  renderChildExchange();
+  renderChildWheelLog();
+  updateChildWheelScore();
+  renderMonthFilter();
+  renderChildCalendarMonth();
+}
+
+let childCanvas, childCtx, childSpinning = false;
+
+function initChildWheel() {
+  childCanvas = document.getElementById('childWheelCanvas');
+  childCtx = childCanvas.getContext('2d');
+  childCanvas.width = 320;
+  childCanvas.height = 320;
+  drawChildWheel();
+}
+
+function drawChildWheel() {
+  let list = app.prize;
+  let len = list.length;
+  let arc = Math.PI * 2 / len;
+  childCtx.clearRect(0, 0, 320, 320);
+  
+  for (let i = 0; i < len; i++) {
+    childCtx.beginPath();
+    childCtx.moveTo(160, 160);
+    childCtx.arc(160, 160, 155, i * arc, (i + 1) * arc);
+    childCtx.closePath();
+    childCtx.fillStyle = colors[i % colors.length];
+    childCtx.fill();
+    childCtx.strokeStyle = '#fff';
+    childCtx.lineWidth = 2;
+    childCtx.stroke();
+    
+    childCtx.save();
+    childCtx.translate(160, 160);
+    childCtx.rotate(i * arc + arc / 2);
+    childCtx.fillStyle = '#fff';
+    childCtx.font = "bold 13px 'Noto Sans SC', sans-serif";
+    childCtx.textAlign = "center";
+    childCtx.fillText(list[i].name, 95, 5);
+    childCtx.restore();
+  }
+  
+  childCtx.beginPath();
+  childCtx.arc(160, 160, 30, 0, Math.PI * 2);
+  childCtx.fillStyle = '#fff';
+  childCtx.fill();
+  childCtx.strokeStyle = '#ddd';
+  childCtx.stroke();
+}
+
+function startChildSpin() {
+  if (childSpinning) return;
+  let child = app.children.find(c => c.id == currentChildId);
+  if (child.total < app.wheelCost) return alert('积分不足');
+  
+  childSpinning = true;
+  document.getElementById('childSpinBtn').disabled = true;
+  child.total -= app.wheelCost;
+  autoSave();
+  updateChildWheelScore();
+  
+  let r = Math.random() * 100, sum = 0, idx = 0;
+  for (let i = 0; i < app.prize.length; i++) {
+    sum += app.prize[i].rate;
+    if (r <= sum) { idx = i; break; }
+  }
+  
+  let target = 360 * 5 + (360 - (360 / app.prize.length) * idx - (360 / app.prize.length / 2));
+  let angl
